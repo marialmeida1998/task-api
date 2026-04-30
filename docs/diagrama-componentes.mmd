@@ -1,0 +1,14 @@
+flowchart LR
+    Client[Cliente HTTP] --> API[API Layer<br/>FastAPI Routes]
+    API --> Service[Service Layer<br/>TaskService]
+    Service --> Repository[Repository Layer<br/>TaskRepository]
+    Repository --> Storage[(Storage<br/>In-memory/DB)]
+
+    Service --> PriorityAdvisor[PriorityAdvisor<br/>AI-assisted prioritization]
+    PriorityAdvisor --> Service
+
+    API --> Schemas[Schemas<br/>Pydantic]
+    Schemas --> API
+
+    Service --> Models[Domain Models]
+    Models --> Service
