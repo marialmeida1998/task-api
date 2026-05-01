@@ -53,3 +53,6 @@ pip-wheel-metadata/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Local demo material
+docs/roteiro-demo-5min.md
