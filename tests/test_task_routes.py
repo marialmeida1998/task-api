@@ -24,6 +24,14 @@ def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
     return TestClient(app)
 
 
+def test_health_check_returns_200(client: TestClient) -> None:
+    response = client.get("/health")
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "ok"
+    assert "timestamp" in response.json()
+
+
 def test_create_task_returns_201(client: TestClient) -> None:
     response = client.post(
         "/tasks",
@@ -38,6 +46,30 @@ def test_create_task_returns_201(client: TestClient) -> None:
     assert response.status_code == 201
     assert response.json()["title"] == "Criar rota de tarefas"
     assert response.json()["status"] == "pendente"
+
+
+def test_create_task_with_empty_title_returns_422(client: TestClient) -> None:
+    response = client.post(
+        "/tasks",
+        json={
+            "title": "",
+            "priority": "media",
+        },
+    )
+
+    assert response.status_code == 422
+
+
+def test_create_task_with_invalid_priority_returns_422(client: TestClient) -> None:
+    response = client.post(
+        "/tasks",
+        json={
+            "title": "Tarefa com prioridade invalida",
+            "priority": "invalida",
+        },
+    )
+
+    assert response.status_code == 422
 
 
 def test_list_tasks_returns_200(client: TestClient) -> None:
@@ -79,6 +111,20 @@ def test_update_task_returns_200(client: TestClient) -> None:
     assert response.json()["title"] == "Tarefa atualizada"
     assert response.json()["status"] == "em_andamento"
     assert response.json()["priority"] == "alta"
+
+
+def test_update_task_with_invalid_status_returns_422(client: TestClient) -> None:
+    created_response = client.post("/tasks", json={"title": "Tarefa original"})
+    task_id = created_response.json()["id"]
+
+    response = client.put(
+        f"/tasks/{task_id}",
+        json={
+            "status": "invalido",
+        },
+    )
+
+    assert response.status_code == 422
 
 
 def test_delete_task_returns_204(client: TestClient) -> None:
