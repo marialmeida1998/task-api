@@ -80,3 +80,80 @@ def test_suggest_uses_local_fallback_when_llm_call_fails(
     priority = advisor.suggest(task)
 
     assert priority == TaskPriority.HIGH
+
+
+def test_suggest_uses_llm_priority_when_available(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("OPENAI_API_KEY", "fake-key")
+
+    advisor = PriorityAdvisor()
+
+    def fake_suggest_with_llm(title: str, description: str | None) -> TaskPriority:
+        return TaskPriority.CRITICAL
+
+    monkeypatch.setattr(advisor, "_suggest_with_llm", fake_suggest_with_llm)
+
+    task = TaskCreate(
+        title="Tarefa simples",
+        description="Sem termos de prioridade local",
+        priority=TaskPriority.LOW,
+    )
+
+    priority = advisor.suggest(task)
+
+    assert priority == TaskPriority.CRITICAL
+
+
+def test_suggest_uses_local_fallback_when_llm_returns_none(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("OPENAI_API_KEY", "fake-key")
+
+    advisor = PriorityAdvisor()
+
+    def fake_suggest_with_llm(title: str, description: str | None) -> None:
+        return None
+
+    monkeypatch.setattr(advisor, "_suggest_with_llm", fake_suggest_with_llm)
+
+    task = TaskCreate(
+        title="Ajuste importante",
+        description="Existe risco de perder o prazo",
+        priority=TaskPriority.MEDIUM,
+    )
+
+    priority = advisor.suggest(task)
+
+    assert priority == TaskPriority.HIGH
+
+
+def test_suggest_uses_local_fallback_when_llm_times_out(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("OPENAI_API_KEY", "fake-key")
+
+    advisor = PriorityAdvisor()
+
+    def fake_suggest_with_llm(title: str, description: str | None) -> TaskPriority:
+        raise TimeoutError
+
+    monkeypatch.setattr(advisor, "_suggest_with_llm", fake_suggest_with_llm)
+
+    task = TaskCreate(
+        title="Incidente urgente",
+        description="Bloqueio no fluxo interno",
+        priority=TaskPriority.MEDIUM,
+    )
+
+    priority = advisor.suggest(task)
+
+    assert priority == TaskPriority.CRITICAL
+
+
+def test_parse_priority_from_output_text() -> None:
+    advisor = PriorityAdvisor()
+
+    priority = advisor._parse_priority("Prioridade sugerida: critica")
+
+    assert priority == TaskPriority.CRITICAL
