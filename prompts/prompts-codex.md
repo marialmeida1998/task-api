@@ -109,3 +109,66 @@
 > **Objetivo:** Avaliar acoplamento, validações faltantes e priorização de testes  
 > **Estilo:** Checklist direto e objetivo  
 > **Resposta:** Apenas checklist  
+
+## Prompt 17 - Testes de service
+
+> **Contexto:** Tenho `TaskService` com CRUD de tarefas  
+> **Objetivo:** Gerar suíte Pytest cobrindo criação, listagem, atualização, exclusão e erro por ID inexistente  
+> **Estilo:** Testes claros, nomes descritivos e fixtures simples  
+> **Resposta:** Código completo de `tests/test_task_service.py`  
+
+## Prompt 18 - Testes do PriorityAdvisor
+
+> **Contexto:** `PriorityAdvisor` possui heurística local e fallback quando a chamada externa falha  
+> **Objetivo:** Gerar testes para os três níveis de prioridade e para o fallback  
+> **Estilo:** Usar `monkeypatch` quando necessário  
+> **Resposta:** Código completo de `tests/test_priority_advisor.py`  
+
+## Prompt 19 - Testes da API
+
+> **Contexto:** API FastAPI com endpoints CRUD de `/tasks`  
+> **Objetivo:** Criar testes de rota com `TestClient` para status `201`, `200`, `204` e `404`  
+> **Estilo:** Isolar dependência de repositório para evitar estado global entre testes  
+> **Resposta:** Código completo de `tests/test_task_routes.py`  
+
+## Prompt 20 - Refatoração DRY/SRP
+
+> **Contexto:** Arquivos `app/services/task_service.py` e `app/repositories/task_repository.py`  
+> **Objetivo:** Sugerir refatoração com foco em DRY (Don't Repeat Yourself) e SRP (Single Responsibility Principle), sem adicionar dependências externas  
+> **Estilo:** Técnico, direto e organizado  
+> **Resposta:** 1) Lista de mudanças propostas  2) Patch sugerido por arquivo  
+
+## Prompt 21 - README final técnico
+
+> **Contexto:** MVP de micro-API de tarefas com prioridade assistida por IA  
+> **Objetivo:** Gerar README completo com instalação, execução, testes, arquitetura, uso e limitações  
+> **Estilo:** Markdown profissional, objetivo e bem estruturado  
+> **Resposta:** README completo  
+
+## Prompt 22 - Revisão final de qualidade
+
+> **Contexto:** Código e testes atuais da aplicação  
+> **Objetivo:** Avaliar riscos técnicos restantes, cobertura de testes e melhorias prioritárias  
+> **Estilo:** Bullets curtos e diretos  
+> **Resposta:** Checklist em bullets  
+
+## Prompt 23 - Makefile
+
+> **Contexto:** Projeto FastAPI com comandos de instalar dependências, executar API e rodar testes  
+> **Objetivo:** Gerar Makefile com targets `install`, `run` e `test`  
+> **Estilo:** Simples e portável  
+> **Resposta:** Conteúdo completo do `Makefile`  
+
+## Prompt 24 - .env.example
+
+> **Contexto:** Projeto FastAPI com uso opcional de integração com LLM  
+> **Objetivo:** Criar arquivo `.env.example` com variáveis essenciais (API key, ambiente, configurações básicas)  
+> **Estilo:** Claro, comentado e seguro (sem dados sensíveis reais)  
+> **Resposta:** Conteúdo completo do `.env.example`  
+
+## Prompt 25 - Revisão de README
+
+> **Contexto:** README atual do projeto  
+> **Objetivo:** Avaliar reprodutibilidade, onboarding técnico e uso de IA  
+> **Estilo:** Checklist objetivo e direto  
+> **Resposta:** Apenas checklist  
