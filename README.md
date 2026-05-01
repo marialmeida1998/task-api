@@ -1,89 +1,119 @@
 # Micro-API de Tarefas com Prioridade Assistida por IA
 
-API em FastAPI para gestao de tarefas de uma equipe interna, com priorizacao assistida por heuristica local e suporte opcional a LLM quando `OPENAI_API_KEY` estiver configurada.
+API em FastAPI para gestao de tarefas de uma equipe interna. A prioridade pode ser calculada por heuristica local e, opcionalmente, por LLM quando `OPENAI_API_KEY` estiver configurada.
 
 ## Objetivo
 
-Fornecer um MVP enxuto para cadastro, consulta, atualizacao e remocao de tarefas, mantendo uma arquitetura simples e evolutiva com separacao entre API, Service, Repository e componente de priorizacao.
+Fornecer um MVP enxuto para cadastro, consulta, atualizacao e remocao de tarefas, com uma arquitetura simples e evolutiva baseada em `API`, `Service`, `Repository` e `PriorityAdvisor`.
 
-## Stack
+## Requisitos
 
-- Python 3.11+
-- FastAPI
-- Uvicorn
-- Pydantic
-- Pytest
-- HTTPX
+- Python 3.11 ou superior
+- `pip`
 - Git
 
-## Instalacao
+## Instalação
 
-Clone ou acesse o diretorio do projeto:
+### 1. Verificar a versao do Python
 
 ```powershell
-cd C:\LABORATÓRIO-PROJETO
+python --version
 ```
 
-Crie o ambiente virtual, se ainda nao existir:
+### 2. Criar o ambiente virtual
 
 ```powershell
 python -m venv .venv
 ```
 
-Ative o ambiente virtual no PowerShell:
+### 3. Ativar o ambiente virtual
+
+PowerShell:
 
 ```powershell
 .\.venv\Scripts\Activate.ps1
 ```
 
-Instale as dependencias:
+CMD:
+
+```bat
+.\.venv\Scripts\activate.bat
+```
+
+### 4. Instalar dependencias
+
+```powershell
+make install
+```
+
+Ou, sem `make`:
 
 ```powershell
 pip install -r requirements.txt
 ```
 
+### 5. Configurar variaveis opcionais
+
+Copie o arquivo de exemplo e ajuste apenas o que for necessario:
+
+```powershell
+copy .env.example .env
+```
+
+Use `OPENAI_API_KEY` somente se quiser habilitar a integracao opcional com LLM.
+
 ## Execucao local
 
-Inicie a API com reload:
+Inicie a API:
+
+```powershell
+make run
+```
+
+Ou diretamente:
 
 ```powershell
 uvicorn app.main:app --reload
 ```
 
-Acesse a documentacao interativa:
+Endpoints principais:
+
+- `GET /health`
+- `POST /tasks`
+- `GET /tasks`
+- `GET /tasks/{task_id}`
+- `PUT /tasks/{task_id}`
+- `DELETE /tasks/{task_id}`
+
+Documentacao interativa:
 
 ```text
 http://127.0.0.1:8000/docs
 ```
 
-Health check:
-
-```text
-GET http://127.0.0.1:8000/health
-```
-
 ## Testes
 
-Execute a suite completa:
+Execute a suite:
+
+```powershell
+make test
+```
+
+Ou diretamente:
 
 ```powershell
 pytest
 ```
 
-Ou usando explicitamente o Python do ambiente virtual:
-
-```powershell
-.\.venv\Scripts\python.exe -m pytest
-```
-
-Cobertura atual da suite:
+Cobertura atual:
 
 - `PriorityAdvisor`
 - `TaskService`
 - Rotas CRUD de `/tasks`
-- Cenarios de sucesso
+- `GET /health`
 - Cenarios de `404 Not Found`
-- Fallback de priorizacao quando chamada externa falha
+- Cenarios de validacao `422`
+- Fallback de priorizacao quando a chamada externa falha
 
 ## Arquitetura
 
@@ -91,42 +121,53 @@ O projeto segue uma separacao simples por camadas:
 
 ```text
 app/
-├── api/
-│   └── task_routes.py
-├── models/
-│   └── task.py
-├── repositories/
-│   └── task_repository.py
-├── services/
-│   ├── priority_advisor.py
-│   └── task_service.py
-└── main.py
+|-- api/
+|   `-- task_routes.py
+|-- models/
+|   `-- task.py
+|-- repositories/
+|   `-- task_repository.py
+|-- services/
+|   |-- priority_advisor.py
+|   `-- task_service.py
+`-- main.py
 ```
 
-### Camadas
+### Fluxo
 
-- `api`: define os endpoints HTTP, status codes e tratamento de erros.
-- `models`: define schemas Pydantic, enums e contratos de entrada/saida.
-- `repositories`: concentra a persistencia em memoria.
-- `services`: concentra regras de negocio e integracao com priorizacao.
-- `PriorityAdvisor`: sugere prioridade por heuristica local e usa LLM opcionalmente.
+- `api`: expoe os endpoints HTTP e traduz erros em status code.
+- `models`: define schemas Pydantic e enums de contrato.
+- `repositories`: guarda a persistencia em memoria.
+- `services`: concentra regras de negocio.
+- `PriorityAdvisor`: decide a prioridade com heuristica local e fallback opcional a LLM.
 
-## Priorizacao assistida
+## Uso de IA
 
-A prioridade da tarefa pode ser sugerida automaticamente pelo `PriorityAdvisor`.
+O `PriorityAdvisor` segue esta ordem:
 
-Comportamento padrao:
+1. Aplica heuristica local.
+2. Se `OPENAI_API_KEY` existir, tenta consultar a LLM com timeout.
+3. Se a chamada falhar, expirar ou retornar algo invalido, usa o fallback local.
 
-- Sem `OPENAI_API_KEY`: usa apenas heuristica local, sem custo externo.
-- Com `OPENAI_API_KEY`: tenta chamada a LLM com timeout.
-- Em caso de erro, timeout ou resposta invalida: usa fallback local obrigatorio.
+Comportamento por cenario:
 
-Variaveis de ambiente opcionais:
+- Sem `OPENAI_API_KEY`: nenhuma chamada externa e nenhum custo adicional.
+- Com `OPENAI_API_KEY`: tenta uso opcional da LLM.
+- Falha externa: a API continua funcionando com o resultado local.
+
+Variaveis relacionadas:
 
 ```powershell
-$env:OPENAI_API_KEY="sua-chave"
-$env:OPENAI_MODEL="gpt-5.4-nano"
+OPENAI_API_KEY=
+OPENAI_MODEL=gpt-5.4-nano
+OPENAI_TIMEOUT_SECONDS=3
 ```
+
+Exemplo de resultado:
+
+- Titulo com `incidente`, `urgente` ou `bloqueio` tende a virar `critica`.
+- Titulo com `prazo`, `risco` ou `importante` tende a virar `alta`.
+- Sem termos fortes, a prioridade informada pode ser mantida.
 
 ## Uso da API
 
@@ -253,11 +294,9 @@ Resposta esperada para tarefa inexistente:
 
 ## Documentacao do projeto
 
-Arquivos complementares:
-
-- `docs/escopo-mvp.md`
-- `docs/backlog-mvp.md`
-- `docs/diagrama-componentes.mmd`
+- [Escopo do MVP](docs/escopo-mvp.md)
+- [Backlog do MVP](docs/backlog-mvp.md)
+- [Diagrama de componentes](docs/diagrama-componentes.mmd)
 
 ## Limitacoes
 
