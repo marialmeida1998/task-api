@@ -2,13 +2,13 @@
 
 ## 1. Objetivo
 
-Este documento tem como finalidade manter os stakeholders alinhados sobre o estado atual dos riscos do projeto, as ações em andamento e os pontos que exigem atenção.
+Este documento tem como finalidade manter os stakeholders alinhados sobre o estado atual dos riscos do projeto, as ações em andamento e os pontos que exigem atenção, em conformidade com práticas de gestão de riscos e comunicação de projetos.
 
 ## 2. Stakeholders envolvidos
 
-- Orientador ou professor responsável pelo projeto acadêmico
-- Equipe de desenvolvimento
-- Usuários ou interessados no MVP de gerenciamento de tarefas
+- orientador ou professor responsável pelo projeto acadêmico;
+- equipe de desenvolvimento;
+- usuários ou interessados no MVP de gerenciamento de tarefas.
 
 ## 3. Estratégia de comunicação
 
@@ -25,17 +25,18 @@ A comunicação deve ocorrer de forma periódica, com foco em:
 - antes de entregas parciais ou demonstrações;
 - sempre que houver mudança relevante na arquitetura, na configuração ou no escopo.
 
-## 5. Status atual (modelo de relatório)
+## 5. Status atual do projeto
 
 ### Status geral: Amarelo
 
-O projeto apresenta risco moderado, principalmente em relação à persistência em memória, à dependência de integração externa para priorização assistida e à necessidade de garantir consistência em ambientes diferentes.
+O projeto apresenta risco moderado, principalmente em relação à persistência em memória, à dependência de integração externa para priorização assistida e à necessidade de manter consistência entre ambientes de execução.
 
 ### Pontos principais
 
 - a integração com OpenAI é opcional e o sistema já conta com fallback local;
 - a persistência em memória pode comprometer a continuidade dos dados após reinicialização;
-- a aplicação possui cobertura de testes para fluxo principal, mas ainda precisa de validação contínua em cenários reais.
+- a aplicação possui cobertura de testes para o fluxo principal, mas ainda precisa de validação contínua em cenários reais;
+- a ausência de autenticação e autorização deve ser tratada como um ponto de atenção em uma evolução posterior.
 
 ### Ações em andamento
 
@@ -51,4 +52,4 @@ O projeto apresenta risco moderado, principalmente em relação à persistência
 
 ## 6. Modelo de mensagem para stakeholders
 
-> O projeto segue com desenvolvimento estável, com foco em manter a funcionalidade principal do MVP e reduzir riscos operacionais. O principal ponto de atenção atual é a limitação de persistência em memória e a necessidade de garantir comportamento previsível mesmo em cenários de falha de integração com IA.
+> O projeto segue com desenvolvimento estável, com foco em manter a funcionalidade principal do MVP e reduzir riscos operacionais. O principal ponto de atenção atual é a limitação de persistência em memória e a necessidade de garantir um comportamento previsível mesmo em cenários de falha de integração com IA.
