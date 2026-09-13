@@ -141,6 +141,38 @@ app/
 - `services`: concentra regras de negocio.
 - `PriorityAdvisor`: decide a prioridade com heuristica local e fallback opcional a LLM.
 
+## Discovery e documentação arquitetural
+
+Como parte desta atividade, foi realizado um discovery técnico com apoio de GenAI e da abordagem **Diagrams as Code**. A análise foi baseada exclusivamente no código e na documentação existentes no repositório, e os artefatos foram mantidos em formato versionável.
+
+- [Documento de discovery](docs/discovery.md)
+- [Diagrama estrutural](docs/architecture-container.mmd)
+- [Diagrama comportamental de criação de tarefa](docs/sequence-create-task.mmd)
+
+Os diagramas são versionados junto ao código, permitindo acompanhar a evolução da arquitetura e comparar a documentação com o comportamento implementado.
+
+### Decisões e ajustes realizados sobre a saída da IA
+
+- **Identificações corretas:** a IA reconheceu a API FastAPI, as camadas de serviço e repositório, o armazenamento em memória, o `PriorityAdvisor`, o fluxo de criação de tarefas e a integração opcional com a OpenAI.
+- **Inferências válidas:** a divisão entre API, serviço, repositório e priorizador foi tratada como uma visão lógica inspirada em C4. O cliente foi representado como cliente HTTP, e o armazenamento foi separado visualmente para facilitar a leitura, embora seja um dicionário interno do repositório.
+- **Pontos corrigidos:** a geração do UUID, do status inicial e dos timestamps foi atribuída ao `TaskRepository`; o fallback foi atribuído ao `PriorityAdvisor`; a condição real de execução local foi descrita como ausência de `OPENAI_API_KEY`, e não como uma decisão de que a heurística seria suficiente; respostas inválidas foram diferenciadas de falhas e timeouts externos; a validação de `TaskCreate` foi incluída no fluxo.
+- **Informações desconhecidas:** permanecem indefinidos a topologia de deploy, os limites de volume e concorrência, as regras de transição de status, os requisitos de observabilidade, a estratégia de persistência futura e a política de autenticação e autorização.
+- **Decisões ainda necessárias:** um futuro agente deverá receber definições sobre o contrato de campos, as regras de repriorização, o comportamento para valores nulos em atualizações, a configuração efetiva de timeout e ambiente, o modelo OpenAI suportado, o tratamento de exceções não previstas, a necessidade de logs e auditoria, os requisitos de persistência, segurança, escala e os perfis de acesso.
+
+### Validação da documentação com GenAI
+
+Após a criação da documentação, foi realizado um teste utilizando somente os documentos produzidos e documentos existentes no repositório, sem consultar o código-fonte.
+
+O teste consistiu em simular a implementação da funcionalidade de filtro de tarefas por status.
+
+- **O que o agente conseguiu determinar com segurança:** a presença do requisito de filtro por status no escopo do MVP, o contexto de domínio das tarefas e a intenção de que a funcionalidade faz parte da API de consulta de tarefas.
+- **O que ele precisaria inferir:** o contrato exato do endpoint, o nome e o tipo do parâmetro de consulta, os valores válidos de status, o comportamento do filtro quando nenhum valor é informado, a combinação com outros filtros e a forma de resposta esperada.
+- **Decisões de implementação ausentes:** o contrato da API, as regras de validação do filtro, o comportamento exato de filtro por status, os cenários de erro e sucesso, e os critérios de teste para a funcionalidade.
+- **Perguntas que precisariam ser feitas ao responsável pelo sistema:** qual é o nome do parâmetro de consulta, quais status existem no sistema, o filtro é case-sensitive, aceita múltiplos valores, combina com outros filtros e como deve se comportar quando o valor informado for inválido ou inexistente?
+- **Principais riscos de um agente inventar decisões:** criar um contrato de API inconsistente com o sistema real, assumir regras de validação sem confirmação, definir filtros com semântica errada, e gerar testes que validam comportamento inexistente ou incompatível com a regra de negócio.
+
+O teste demonstrou que a documentação reduziu a necessidade de inferências, mas ainda possui lacunas relacionadas principalmente ao contrato da API, regras de validação, comportamento de filtros e critérios de teste.
+
 ## Uso de IA
 
 O `PriorityAdvisor` segue esta ordem:

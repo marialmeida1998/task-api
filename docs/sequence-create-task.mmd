@@ -1,0 +1,40 @@
+sequenceDiagram
+    actor Cliente as Cliente / Usuario da API
+    participant API as API FastAPI
+    participant Service as TaskService
+    participant Advisor as PriorityAdvisor
+    participant LLM as OpenAI Responses API
+    participant Repository as TaskRepository
+    participant Memory as Armazenamento em memoria
+
+    Cliente->>API: POST /tasks com dados da tarefa
+    API->>API: Valida TaskCreate via FastAPI/Pydantic
+    API->>Service: create(TaskCreate)
+    Service->>Advisor: suggest(TaskCreate)
+    Advisor->>Advisor: Calcula prioridade pela heuristica local
+
+    alt OPENAI_API_KEY ausente
+        Advisor-->>Service: Prioridade local calculada
+    else OPENAI_API_KEY configurada
+        Advisor->>LLM: POST /v1/responses com titulo e descricao
+        alt Resposta valida
+            LLM-->>Advisor: Resposta com prioridade reconhecivel
+            Advisor->>Advisor: Interpreta a prioridade da LLM
+            Advisor-->>Service: Prioridade retornada pela LLM
+        else Falha externa ou timeout
+            LLM--x Advisor: Erro HTTP, de rede ou timeout
+            Advisor->>Advisor: Usa a prioridade local como fallback
+            Advisor-->>Service: Prioridade local de fallback
+        else Resposta sem prioridade reconhecivel
+            LLM-->>Advisor: Resposta recebida sem prioridade valida
+            Advisor->>Advisor: Usa a prioridade local como fallback
+            Advisor-->>Service: Prioridade local de fallback
+        end
+    end
+
+    Service->>Repository: create(tarefa com prioridade)
+    Repository->>Repository: Gera UUID, status pendente\ne timestamps
+    Repository->>Memory: Grava a TaskOut no dict interno
+    Repository-->>Service: TaskOut criada
+    Service-->>API: Tarefa criada
+    API-->>Cliente: 201 Created com TaskOut

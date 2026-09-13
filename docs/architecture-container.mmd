@@ -1,0 +1,30 @@
+flowchart LR
+    Client["Usuario / Cliente HTTP"]
+
+    subgraph TaskAPI["Task API (fronteira logica; componentes no mesmo processo)"]
+        FastAPI["API FastAPI\nRotas HTTP"]
+        Services["Camada de servicos\nTaskService"]
+        Advisor["PriorityAdvisor\nHeuristica local + fallback"]
+        Repository["Repositorio de tarefas\nTaskRepository"]
+        Memory[("Armazenamento em memoria\ndict interno do TaskRepository")]
+
+        FastAPI -->|"delega operacoes CRUD"| Services
+        Services -->|"cria, lista, consulta, atualiza e remove"| Repository
+        Repository -->|"acessa o dict interno para ler e gravar tarefas"| Memory
+        Services -->|"sugere prioridade na criacao\nou na atualizacao sem prioridade explicita"| Advisor
+        Advisor -->|"retorna prioridade local, da LLM\nou fallback local"| Services
+    end
+
+    LLM["OpenAI Responses API\nIntegracao externa opcional"]
+
+    Client -->|"requisicoes HTTP"| FastAPI
+    Advisor -.->|"opcional: somente com\nOPENAI_API_KEY configurada"| LLM
+    LLM -.->|"resposta HTTP ou falha;\nfallback e decidido pelo Advisor"| Advisor
+
+    classDef external fill:#fff4e5,stroke:#c77700,color:#402600
+    classDef container fill:#eaf3ff,stroke:#2f6f9f,color:#102a43
+    classDef storage fill:#eef7ee,stroke:#4b7f52,color:#18351d
+
+    class Client,LLM external
+    class FastAPI,Services,Advisor,Repository container
+    class Memory storage
